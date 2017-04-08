@@ -18,7 +18,7 @@ class LogisticRegression(Classifier):
         self.weightsVector = []
     
     def fixClassLabels(self, dataSet):
-        for inst in trainingSet:
+        for inst in dataSet:
             if(inst.classLabel == 'POS'):
                 inst.perClassifierLabel = 1
             else:
