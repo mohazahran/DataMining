@@ -65,9 +65,17 @@ class AdaBoost(Classifier):
             totPred = 0.0
             for dt in self.trees:
                 pred = dt.classifyOne(inst)
-                totPred += pred * self.trees[dt]
-            finalPrediction = np.sign(totPred)
-            inst.predictedClassLabel = int(finalPrediction)
+                if(pred == self.POS):
+                    val = 1
+                else:
+                    val = -1
+                totPred += val * self.trees[dt]
+                
+            finalPrediction = int(np.sign(totPred))
+            if(finalPrediction == 1 or finalPrediction == 0):
+                inst.predictedClassLabel = self.POS
+            else:
+                inst.predictedClassLabel = self.NEG
             
                 
                     
