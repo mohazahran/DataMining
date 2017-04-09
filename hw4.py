@@ -100,7 +100,7 @@ def incremental_kfold():
     logReg_learningRate = 0.01
     myLambda = 0.01 #regularization coefficient
     depthLimit = 10
-    boostingDepth = 5
+    boostingDepth = 3
     samplesCountLimit = 10
     numberOfTrees = 50
     
@@ -110,8 +110,8 @@ def incremental_kfold():
     random.shuffle(dataset)
     foldSize = len(dataset)/k
     
-    #models = ['SVM', 'DT', 'BT', 'RF', 'BST']
-    models = ['BT']
+    models = ['SVM', 'DT', 'BT', 'RF', 'BST']
+    #models = ['BT']
     
     header = 'tss'+','
     for m in models:
