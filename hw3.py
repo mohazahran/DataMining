@@ -247,15 +247,6 @@ def binaryVSternary(k, trainingPortions, trainingPath, model):
     
     
 def debugging():
-    '''
-    self.text = ''
-        self.classLabel = None
-        self.predictedClassLabel = ''
-        self.id = -1
-        self.cleanedText = ''
-        self.featureVector = None
-        self.featureVectorDic = None
-    '''
     trainingSet = []
     i1 = Instance()
     i1.classLabel = 1

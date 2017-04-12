@@ -249,7 +249,7 @@ class DecisionTree(Classifier):
                 continue      
             if(currentNode.depth >= self.depthLimit):
                 continue
-            if(len(currentNode.trainingData) <= self.samplesCountLimit):
+            if(len(currentNode.trainingData) <= self.samplesCountLimit and currentNode != root):
                 continue
                              
             splitOnFeature, featurePossibleValues = self.chooseFeatureByGiniGain(currentNode)
@@ -278,7 +278,7 @@ class DecisionTree(Classifier):
     def classifyOne(self, inst):
         currentDepth = 0
         currectNode = self.root
-        predictedLabel = -1
+        predictedLabel = None
         while len(currectNode.children)>0 and currentDepth <= self.depthLimit: # till we reach a leaf or reach depth threshold           
             currentValue = inst.featureVector[currectNode.featureIndex] 
             foundChild = False

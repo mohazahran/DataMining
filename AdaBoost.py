@@ -36,9 +36,8 @@ class AdaBoost(Classifier):
     
     def train(self, trainingSet):
         probOne = 1.0 / float(len(trainingSet)) 
-        instanceWeights = [probOne]*len(trainingSet)
+        instanceWeights = [float(probOne)]*len(trainingSet)
         for cnt,dt in enumerate(self.trees):
-            #print cnt,
             ts = np.random.choice(trainingSet, len(trainingSet), replace=True, p=instanceWeights)
             dt.train(ts)
             dtError = 0.0
@@ -46,8 +45,20 @@ class AdaBoost(Classifier):
                 pred = dt.classifyOne(trainingSet[i])
                 trainingSet[i].predictedClassLabel = pred
                 if(pred != trainingSet[i].classLabel):
-                    dtError += instanceWeights[i]
+                    dtError += float(instanceWeights[i])
             
+            if(dtError == 1.0):
+                #print 'dtError1', dtError
+                self.trees[dt] = None
+                continue
+            
+            if(dtError == 0.0):
+                #print 'dtError0', dtError
+                self.trees[dt] = None
+                continue
+                
+            
+            #print dtError
             alpha = (0.5) * math.log((1-dtError)/dtError)
             self.trees[dt] = alpha
             
@@ -69,7 +80,8 @@ class AdaBoost(Classifier):
                     val = 1
                 else:
                     val = -1
-                totPred += val * self.trees[dt]
+                if(self.trees[dt] != None):
+                    totPred += val * self.trees[dt]
                 
             finalPrediction = int(np.sign(totPred))
             if(finalPrediction == 1 or finalPrediction == 0):

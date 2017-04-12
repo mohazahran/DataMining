@@ -141,7 +141,7 @@ class RandomForestTree(DecisionTree):
                 continue      
             if(currentNode.depth >= self.depthLimit):
                 continue
-            if(len(currentNode.trainingData) <= self.samplesCountLimit):
+            if(len(currentNode.trainingData) <= self.samplesCountLimit and currentNode != root):
                 continue
                              
             splitOnFeature, featurePossibleValues = self.chooseFeatureByGiniGain(currentNode)

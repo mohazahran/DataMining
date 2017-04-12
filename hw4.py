@@ -17,11 +17,11 @@ from AdaBoost import *
 
 
 def main():  
-    trainingPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw2/yelp_data.csv'
-    testingPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw2/yelp_data.csv'
-    
+    #trainingPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw2/yelp_data.csv'
+    trainingPath = 'yelp_data.csv'
     #trainingPath = '/Users/mohame11/Downloads/training_dataset.csv'
     #testingPath = '/Users/mohame11/Downloads/testing_dataset.csv'
+    isBinaryFeatures= True
     maxCountCutOff = 100 #top maxCountCutOff frequent words will be discarded
     allowedVocabCount = 1000 #the total number of words allowed in the vocab
     maxIteration = 100
@@ -29,13 +29,42 @@ def main():
     svm_learningRate = 0.5
     logReg_learningRate = 0.01
     myLambda = 0.01 #regularization coefficient
-    
-    modelType = 'BT'
-    isBinaryFeatures = True
     depthLimit = 10
+    boostingDepth = 10
     samplesCountLimit = 10
     numberOfTrees = 50
+    modelType = 'DT'
+    
+    
+    if(len(sys.argv) == 3): #experiments 
+        trainingPath = sys.argv[1]
+        if(sys.argv[2] == '1'):
+            incremental_kfold_Q1(trainingPath)
+            return
+        elif(sys.argv[2] == '2'):
+            incremental_kfold_Q2(trainingPath)
+            return
+        elif(sys.argv[2] == '3'):
+            incremental_kfold_Q3(trainingPath)
+            return
+        elif(sys.argv[2] == '4'):
+            incremental_kfold_Q4(trainingPath)
+            return
         
+    if(len(sys.argv) == 4): # default operation
+        trainingPath = sys.argv[1]
+        testingPath = sys.argv[2]
+        if(sys.argv[3] == '1'):
+            modelType = 'DT'
+        elif(sys.argv[3] == '2'):
+            modelType = 'BT'
+        elif(sys.argv[3] == '3'):
+            modelType = 'RF'
+        elif(sys.argv[3] == '4'):
+            modelType = 'BST'
+        elif(sys.argv[3] == '5'):
+            modelType = 'SVM'   
+    
     if(modelType == 'LR'):
         myClassifier = LogisticRegression(allowedVocabCount, maxCountCutOff, isBinaryFeatures)
         myClassifier.learningRate = logReg_learningRate
@@ -59,34 +88,36 @@ def main():
     elif(modelType == 'BT'):
         myClassifier = BaggedDecisionTrees(numberOfTrees, allowedVocabCount, maxCountCutOff, isBinaryFeatures, depthLimit, samplesCountLimit)
         
-    elif(modelType == 'RT'):
+    elif(modelType == 'RF'):
         myClassifier = RandomForest(numberOfTrees, allowedVocabCount, maxCountCutOff, isBinaryFeatures, depthLimit, samplesCountLimit)
     
     elif(modelType == 'BST'):
-        myClassifier = AdaBoost(numberOfTrees, allowedVocabCount, maxCountCutOff, isBinaryFeatures, depthLimit, samplesCountLimit)
+        myClassifier = AdaBoost(numberOfTrees, allowedVocabCount, maxCountCutOff, isBinaryFeatures, boostingDepth, samplesCountLimit)
         
-        
-        
-        
-     
         
     parsedTrainingSet = myClassifier.parseData(trainingPath)
     pasredTestSet = myClassifier.parseData(testingPath)
-    
+        
     myClassifier.buildFeatures(parsedTrainingSet)
-    
+
     myClassifier.getFeaturesVector(parsedTrainingSet)
+    myClassifier.fixClassLabels(parsedTrainingSet)
+    
     myClassifier.getFeaturesVector(pasredTestSet)
+    myClassifier.fixClassLabels(pasredTestSet)
     
     myClassifier.train(parsedTrainingSet)
+    
     myClassifier.classify(pasredTestSet)
+
+    zeroOneLoss = myClassifier.evaluatePredictions(pasredTestSet)
     
     print '\nZERO-ONE-LOSS-'+modelType, myClassifier.evaluatePredictions(pasredTestSet)
     
     
-def incremental_kfold_Q1():
+def incremental_kfold_Q1(trainingPath):
     #trainingPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw2/yelp_data.csv'
-    trainingPath = 'yelp_data.csv'
+    #trainingPath = 'yelp_data.csv'
     #trainingPath = '/Users/mohame11/Downloads/training_dataset.csv'
     #testingPath = '/Users/mohame11/Downloads/testing_dataset.csv'
     k = 10
@@ -200,9 +231,9 @@ def incremental_kfold_Q1():
         print ''
 
 
-def incremental_kfold_Q2():
+def incremental_kfold_Q2(trainingPath):
     #trainingPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw2/yelp_data.csv'
-    trainingPath = 'yelp_data.csv'
+    #trainingPath = 'yelp_data.csv'
     #trainingPath = '/Users/mohame11/Downloads/training_dataset.csv'
     #testingPath = '/Users/mohame11/Downloads/testing_dataset.csv'
     k = 10
@@ -234,6 +265,8 @@ def incremental_kfold_Q2():
     print header
     #print 'tss\tSVM\tSVM_std\tLR\tLR_std\tNB\tNB_std'
     tss = 500
+    if(0.25*len(dataset) < tss):
+        tss = int(0.25*len(dataset))
     for allowedVocabCount in [200, 500, 1000, 1500]:
         resDic = {}
         for m in models:
@@ -314,9 +347,9 @@ def incremental_kfold_Q2():
         print ''   
     
         
-def incremental_kfold_Q3():
+def incremental_kfold_Q3(trainingPath):
     #trainingPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw2/yelp_data.csv'
-    trainingPath = 'yelp_data.csv'
+    #trainingPath = 'yelp_data.csv'
     #trainingPath = '/Users/mohame11/Downloads/training_dataset.csv'
     #testingPath = '/Users/mohame11/Downloads/testing_dataset.csv'
     k = 10
@@ -348,6 +381,8 @@ def incremental_kfold_Q3():
     print header
     #print 'tss\tSVM\tSVM_std\tLR\tLR_std\tNB\tNB_std'
     tss = 500
+    if(0.25*len(dataset) < tss):
+        tss = int(0.25*len(dataset))
     for depthLimit in [5, 10, 15, 20]:
         boostingDepth = depthLimit
         resDic = {}
@@ -429,9 +464,9 @@ def incremental_kfold_Q3():
         print ''        
         
         
-def incremental_kfold_Q4():
+def incremental_kfold_Q4(trainingPath):
     #trainingPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw2/yelp_data.csv'
-    trainingPath = 'yelp_data.csv'
+    #trainingPath = 'yelp_data.csv'
     #trainingPath = '/Users/mohame11/Downloads/training_dataset.csv'
     #testingPath = '/Users/mohame11/Downloads/testing_dataset.csv'
     k = 10
@@ -462,6 +497,8 @@ def incremental_kfold_Q4():
     print header
     #print 'tss\tSVM\tSVM_std\tLR\tLR_std\tNB\tNB_std'
     tss = 500
+    if(0.25*len(dataset) < tss):
+        tss = int(0.25*len(dataset))
     for numberOfTrees in [10, 25, 50, 100]:
         resDic = {}
         for m in models:
@@ -545,7 +582,7 @@ if __name__ == "__main__":
     #import cProfile
     #cProfile.run('main()')
     #trainingPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw2/yelp_data.csv'
-    incremental_kfold_Q4()
-    #main()
+    #incremental_kfold_Q4('yelp_train0.txt')
+    main()
    
     
