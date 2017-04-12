@@ -100,7 +100,7 @@ def incremental_kfold_Q1():
     logReg_learningRate = 0.01
     myLambda = 0.01 #regularization coefficient
     depthLimit = 10
-    boostingDepth = 3
+    boostingDepth = 10
     samplesCountLimit = 10
     numberOfTrees = 50
     
@@ -215,7 +215,7 @@ def incremental_kfold_Q2():
     logReg_learningRate = 0.01
     myLambda = 0.01 #regularization coefficient
     depthLimit = 10
-    boostingDepth = 3
+    boostingDepth = 10
     samplesCountLimit = 10
     numberOfTrees = 50
     
@@ -329,7 +329,7 @@ def incremental_kfold_Q3():
     logReg_learningRate = 0.01
     myLambda = 0.01 #regularization coefficient
     depthLimit = 10
-    boostingDepth = 3
+    boostingDepth = 10
     samplesCountLimit = 10
     numberOfTrees = 50
     
@@ -444,7 +444,7 @@ def incremental_kfold_Q4():
     logReg_learningRate = 0.01
     myLambda = 0.01 #regularization coefficient
     depthLimit = 10
-    boostingDepth = 3
+    boostingDepth = 10
     samplesCountLimit = 10
     numberOfTrees = 50
     

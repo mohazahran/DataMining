@@ -236,7 +236,7 @@ class DecisionTree(Classifier):
         root = node()
         root.featureIndexList = featureIndexList
         root.trainingData = trainingSet
-        root.depth = 0
+        root.depth = 1
         
         Q = Queue.Queue()    
         Q.put(root)
