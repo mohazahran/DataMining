@@ -57,7 +57,44 @@ def plotEvecs(vecs, dim, l, w):
     #img = 
    
     
+
+
+def visualizeClusters(clusters, title, dataSet):
+    colorMap = {'c0':'blue', 'c1':'green', 'c2':'red', 'c3':'cyan', 'c4':'magenta', 'c5':'yellow', 'c6':'black', 'c7':'grey', 'c8':'orange', 'c9':'pink'}
+    X = []
+    Y = []
+    colors = []
+    for i,c in enumerate(clusters):
+        color = colorMap['c'+str(i)]
+        for m in c.members:
+            X.append(dataSet[m].featureVector[0])
+            Y.append(dataSet[m].featureVector[1])
+            colors.append(color)
     
+    plt.scatter(X, Y, s=80, c=colors,label=str(colorMap))
+    plt.legend(loc='upper center', shadow=True, prop={'size':10})
+    plt.savefig(title+'.pdf', bbox_inches='tight')
+    plt.show()
+    
+def visualizeClustersClasses(clusters, title, dataSet):
+    plt.Figure()
+    colorMap = {'0':'blue', '1':'green', '2':'red', '3':'cyan', '4':'magenta', '5':'yellow', '6':'black', '7':'grey', '8':'orange', '9':'pink'}
+    X = []
+    Y = []
+    colors = []
+    for i,c in enumerate(clusters):
+        for m in c.members:
+            X.append(dataSet[m].featureVector[0])
+            Y.append(dataSet[m].featureVector[1])
+            colors.append(colorMap[dataSet[m].classLabel])
+    
+    plt.scatter(X, Y, s=80, c=colors,label=str(colorMap))
+    plt.legend(loc='upper center', shadow=True, prop={'size':10})
+    plt.savefig(title+'.pdf', bbox_inches='tight')
+    plt.show()
+       
+
+
 def visualizeSamples(samples, title):
     colorMap = {'0':'blue', '1':'green', '2':'red', '3':'cyan', '4':'magenta', '5':'yellow', '6':'black', '7':'grey', '8':'orange', '9':'pink'}
     

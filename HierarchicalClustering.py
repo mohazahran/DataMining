@@ -112,8 +112,13 @@ class HierarchicalClustering(ClusteringAlgorithm):
             return None
         clusterList = []
         requiredDepth = int(math.log(k,2))
-        self.atDepth(Z, -1, 0, requiredDepth, clusterList, len(dataSet), k)
-        self.getMoreClusters(Z, clusterList, dataSet, k)
+        
+        #self.atDepth(Z, -1, 0, requiredDepth, clusterList, len(dataSet), k)
+        #self.getMoreClusters(Z, clusterList, dataSet, k)
+        
+        self.atDepth(Z, -1, 1, requiredDepth, clusterList, len(dataSet), np.inf)
+        
+        
         clusters = []
         for cid in clusterList:
             c = Cluster()

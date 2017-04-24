@@ -121,6 +121,39 @@ def QA():
     
 
 
+def QB4():
+    dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
+    #dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
+    option = 'iii'
+    k = 2
+    metric = 'Mutual_Information_Gain'
+    distanceMeasure = 'euclidean'
+    maxIter = 50
+    
+    
+    c = ClusteringAlgorithm(distanceMeasure)
+    parsedDataSet = c.parseData(dataPath)
+    #parsedDataSet = parsedDataSet[:1000]
+    
+    print option,k,metric
+    
+    dataSet = selectFromData(parsedDataSet, option)
+    dataMatrix = c.getDataMatrix(dataSet)
+    pairWiseDistances = squareform(pdist(dataMatrix, metric=distanceMeasure))
+   
+    kmeans = Kmeans(distanceMeasure, k, maxIter)
+    kmeans.doClustering(dataSet)
+    
+    metricVal = kmeans.evaluate(metric, dataSet, pairWiseDistances)
+    print metricVal
+    
+    title = 'kmeans_k'+str(k)+'_dataVersion_'+option
+    
+    visualizeClusters(kmeans.clusters, title, dataSet)
+    visualizeClustersClasses(kmeans.clusters, title+'_classes', dataSet)
+    
+    
+
 def QB():
     dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
     #dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
@@ -193,13 +226,13 @@ def QC():
     #drawDenrodgrams()
     dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
     #dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
-    distances = ['single', 'complete', 'average']
-    distanceMeasure = 'average'
-    metricTypes = ['Squared_Distances', 'Silhouette_Coeff']
+    #distances = ['single', 'complete', 'average']
+    distanceMeasure = 'single'
+    metricTypes = ['Squared_Distances', 'Silhouette_Coeff', 'Mutual_Information_Gain']
     hc = HierarchicalClustering(distanceMeasure)
     parsedDataSet = hc.parseData(dataPath)
     
-    dataSet = selectFromData(parsedDataSet, 'c1')
+    dataSet = selectFromData(parsedDataSet, 'i')
     #dataSet = parsedDataSet[200:250]
     
     dataMatrix = hc.getDataMatrix(dataSet)
@@ -210,7 +243,7 @@ def QC():
     print 'k,'+','.join(metricTypes)
     for k in [2,4,8,16,32]:
     #for k in [32]:
-        print k,
+        print k,',',
         clusters = hc.getClusters(Z, k, dataSet)
         hc.clusters = clusters
         print len(hc.clusters)
@@ -218,7 +251,7 @@ def QC():
         #    print c.members
         for metric in metricTypes:
             res = hc.evaluate(metric, dataSet, pairWiseDistances)
-            print res,
+            print res,',',
         print
             
             
@@ -230,7 +263,7 @@ def bonus():
     metricTypes = ['Squared_Distances', 'Silhouette_Coeff']
     k = 10
     PCA_dim = 10
-    maxIter = 5
+    maxIter = 50
     l,w = 28,28
     sampleCount = 1000
     
@@ -246,15 +279,74 @@ def bonus():
     
     plotEvecs(evecs, PCA_dim, l, w)
     
-    rows,cols = reducedMatrix.shape
-    for r in range(rows):
-        dataSet[r].featureVector = reducedMatrix[r]
+    #rows,cols = reducedMatrix.shape
+    #for r in range(rows):
+    #    dataSet[r].featureVector = reducedMatrix[r]
         
     #samples = np.random.choice(dataSet, sampleCount, replace=False)
     #samples = dataSet[0:1000]
     #visualizeSamples(samples,'sampleData_2D_PCA')
     
     #kmeans.doClustering(dataSet)
+    
+
+def bonus4():
+    dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
+    PCA_dim = 10
+    dataOptions = ['i', 'ii', 'iii']
+    K = [2, 4, 8, 16, 32]
+    metricTypes = ['Squared_Distances', 'Silhouette_Coeff']
+    distanceMeasure = 'euclidean'
+    maxIter = 50
+    repeatExp = 10
+    
+    c = ClusteringAlgorithm()
+    parsedDataSet = c.parseData(dataPath)
+
+    matrix = c.getDataMatrix(parsedDataSet)
+    
+    reducedMatrix, evecs, evals = PCA(matrix, PCA_dim)
+    
+    rows,cols = reducedMatrix.shape
+    for r in range(rows):
+        parsedDataSet[r].featureVector = reducedMatrix[r]
+    
+    
+    
+    files = {}
+    for d in dataOptions:
+        f = open('bonus_dataSet_v'+d,'w')
+        f.write('k,Squared_Distances_mean,Squared_Distances_std,Silhouette_Coeff_mean,Silhouette_Coeff_std'+'\n')
+        files[d] = f
+    
+    for option in dataOptions:
+        print option
+        dataSet = selectFromData(parsedDataSet, option)
+        dataMatrix = c.getDataMatrix(dataSet)
+        pairWiseDistances = squareform(pdist(dataMatrix, metric=distanceMeasure))
+        
+        for k in K:
+            print k
+            resDic = {}
+            files[option].write(str(k)+',')
+                
+            for m in metricTypes:
+                resDic[m] = []
+                
+            for i in range(repeatExp):
+                kmeans = Kmeans(distanceMeasure, k, maxIter)
+                kmeans.doClustering(dataSet)
+                for metric in metricTypes:
+                    metricVal = kmeans.evaluate(metric, dataSet, pairWiseDistances)
+                    resDic[metric].append(metricVal)
+            
+            for m in metricTypes:
+                avg = float(sum(resDic[m]))/float(len(resDic[m]))
+                stdd = math.sqrt( sum([(x-avg)**2 for x in resDic[m]]) / float(len(resDic[m])) )
+                files[option].write(str(avg)+',')
+                files[option].write(str(stdd)+',')
+            files[option].write('\n')
+            files[option].flush()
     
     
     
@@ -263,7 +355,9 @@ def bonus():
 
 if __name__ == "__main__":
     #QA()
-    QB()
+    #QB()
+    #QB4()
     #QC()
     #bonus()
+    bonus4()
     #main()
