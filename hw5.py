@@ -9,6 +9,8 @@ from ClusteringAlgorithm import ClusteringAlgorithm
 from scipy.spatial.distance import pdist
 from scipy.spatial.distance import squareform
 import math
+import numpy as np
+from PCA import *
 
 
 def main():
@@ -54,6 +56,70 @@ def selectFromData(dataSet, option):
             if(inst.classLabel in ['6','7']):
                 filtered.append(inst)
         return filtered
+    
+    elif(option == 'c1'):
+        filtered = []
+        groupByLabel = {}
+        for i,inst in enumerate(dataSet):
+            if(inst.classLabel in groupByLabel):
+                groupByLabel[inst.classLabel].append(i)
+            else:
+                groupByLabel[inst.classLabel] = [i]
+        
+        for label in groupByLabel:
+            selectedIdx = np.random.choice(groupByLabel[label], 10, replace=False)
+            for idx in selectedIdx:
+                filtered.append(dataSet[idx])
+        return filtered
+    
+    elif(option == 'a1'):
+        filtered = []
+        groupByLabel = {}
+        for i,inst in enumerate(dataSet):
+            if(inst.classLabel in groupByLabel):
+                groupByLabel[inst.classLabel].append(i)
+            else:
+                groupByLabel[inst.classLabel] = [i]
+        
+        for label in groupByLabel:
+            selectedIdx = np.random.choice(groupByLabel[label], 1, replace=False)
+            for idx in selectedIdx:
+                filtered.append(dataSet[idx])
+        return filtered
+            
+            
+            
+                
+        
+
+
+def QA():
+    '''
+    print 'QA1'
+    dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
+    distanceMeasure = 'euclidean'
+    algo = ClusteringAlgorithm(distanceMeasure)
+    parsedDataSet = algo.parseData(dataPath)
+    
+    dataSet = selectFromData(parsedDataSet, 'a1')
+    for inst in dataSet:
+        v = np.array(inst.featureVector, 'd')
+        im = v.reshape(28,28)
+        plt.imshow(im, cmap='gray')
+        plt.savefig('QA1_digit'+str(inst.classLabel)+'.pdf', bbox_inches='tight')
+        
+    '''
+    
+    
+    print 'QA2'
+    dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
+    distanceMeasure = 'euclidean'
+    algo = ClusteringAlgorithm(distanceMeasure)
+    parsedDataSet = algo.parseData(dataPath)
+    dataSet = selectFromData(parsedDataSet, 'c1')
+    visualizeSamples(dataSet, 'QA2_1000RandomSamples_tSNE')
+    
+
 
 def QB():
     dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
@@ -62,7 +128,7 @@ def QB():
     K = [2, 4, 8, 16, 32]
     metricTypes = ['Squared_Distances', 'Silhouette_Coeff']
     distanceMeasure = 'euclidean'
-    maxIter = 50
+    maxIter = 5
     modelType = 'kmeans'
     repeatExp = 10
     
@@ -76,7 +142,7 @@ def QB():
             
     c = ClusteringAlgorithm(distanceMeasure)
     parsedDataSet = c.parseData(dataPath)
-    #parsedDataSet = parsedDataSet[:1000]
+    parsedDataSet = parsedDataSet[:1000]
     
     for option in dataOptions:
         print option
@@ -107,11 +173,97 @@ def QB():
             files[option].write('\n')
             files[option].flush()
     
+
+
+def drawDenrodgrams():
+    dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
+    distances = ['single', 'complete', 'average']
+    hc = HierarchicalClustering(None)
+    parsedDataSet = hc.parseData(dataPath)
+    dataSet = selectFromData(parsedDataSet, 'c1')
+    #draw dendrograms
+    for dist in distances:
+        hc = HierarchicalClustering(dist)
+        Z = hc.doClustering(dataSet)
+        hc.drawDendrogram(Z)
+        
+    
+
+def QC():
+    #drawDenrodgrams()
+    dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
+    #dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
+    distances = ['single', 'complete', 'average']
+    distanceMeasure = 'average'
+    metricTypes = ['Squared_Distances', 'Silhouette_Coeff']
+    hc = HierarchicalClustering(distanceMeasure)
+    parsedDataSet = hc.parseData(dataPath)
+    
+    dataSet = selectFromData(parsedDataSet, 'c1')
+    #dataSet = parsedDataSet[200:250]
+    
+    dataMatrix = hc.getDataMatrix(dataSet)
+    pairWiseDistances = squareform(pdist(dataMatrix, metric='euclidean'))
+    Z = hc.doClustering(dataSet)
+    #hc.drawDendrogram(Z)
+    
+    print 'k,'+','.join(metricTypes)
+    for k in [2,4,8,16,32]:
+    #for k in [32]:
+        print k,
+        clusters = hc.getClusters(Z, k, dataSet)
+        hc.clusters = clusters
+        print len(hc.clusters)
+        #for c in hc.clusters:
+        #    print c.members
+        for metric in metricTypes:
+            res = hc.evaluate(metric, dataSet, pairWiseDistances)
+            print res,
+        print
+            
+            
+
+def bonus():
+    #dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
+    dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
+    distanceMeasure = 'euclidean'
+    metricTypes = ['Squared_Distances', 'Silhouette_Coeff']
+    k = 10
+    PCA_dim = 10
+    maxIter = 5
+    l,w = 28,28
+    sampleCount = 1000
+    
+    kmeans = Kmeans(distanceMeasure, k, maxIter)
+    dataSet = kmeans.parseData(dataPath)
+    
+    #samples = dataSet[0:1000]
+    #visualizeSamples(samples, 'sampleData_2D_t_SNE')
+    
+    matrix = kmeans.getDataMatrix(dataSet)
+    
+    reducedMatrix, evecs, evals = PCA(matrix, PCA_dim)
+    
+    plotEvecs(evecs, PCA_dim, l, w)
+    
+    rows,cols = reducedMatrix.shape
+    for r in range(rows):
+        dataSet[r].featureVector = reducedMatrix[r]
+        
+    #samples = np.random.choice(dataSet, sampleCount, replace=False)
+    #samples = dataSet[0:1000]
+    #visualizeSamples(samples,'sampleData_2D_PCA')
+    
+    #kmeans.doClustering(dataSet)
+    
     
     
 
 
 
 if __name__ == "__main__":
+    #QA()
     QB()
+    #QC()
+    #bonus()
     #main()
