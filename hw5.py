@@ -294,24 +294,15 @@ def bonus4():
     dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
     PCA_dim = 10
     dataOptions = ['i', 'ii', 'iii']
-    K = [2, 4, 8, 16, 32]
+    K = [2]
     metricTypes = ['Squared_Distances', 'Silhouette_Coeff']
     distanceMeasure = 'euclidean'
     maxIter = 50
-    repeatExp = 10
+    repeatExp = 1
     
-    c = ClusteringAlgorithm()
+    c = ClusteringAlgorithm(distanceMeasure)
     parsedDataSet = c.parseData(dataPath)
 
-    matrix = c.getDataMatrix(parsedDataSet)
-    
-    reducedMatrix, evecs, evals = PCA(matrix, PCA_dim)
-    
-    rows,cols = reducedMatrix.shape
-    for r in range(rows):
-        parsedDataSet[r].featureVector = reducedMatrix[r]
-    
-    
     
     files = {}
     for d in dataOptions:
@@ -322,8 +313,14 @@ def bonus4():
     for option in dataOptions:
         print option
         dataSet = selectFromData(parsedDataSet, option)
-        dataMatrix = c.getDataMatrix(dataSet)
-        pairWiseDistances = squareform(pdist(dataMatrix, metric=distanceMeasure))
+        
+        matrix = c.getDataMatrix(dataSet)
+        reducedMatrix, evecs, evals = PCA(matrix, PCA_dim)
+        rows,cols = reducedMatrix.shape
+        for r in range(rows):
+            parsedDataSet[r].featureVector = reducedMatrix[r]
+        
+        pairWiseDistances = squareform(pdist(matrix, metric=distanceMeasure))
         
         for k in K:
             print k
@@ -350,7 +347,44 @@ def bonus4():
     
     
     
+def bonus_B4():
+    #dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-embedding.csv'
+    dataPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/Spring2017_sem5/CS57300_DataMining/hw/hw5/digits-raw.csv'
+    option = 'iii'
+    k = 2
+    metric = 'Mutual_Information_Gain'
+    distanceMeasure = 'euclidean'
+    maxIter = 50
+    PCA_dim = 10
+    
+    
+    c = ClusteringAlgorithm(distanceMeasure)
+    parsedDataSet = c.parseData(dataPath)
 
+    matrix = c.getDataMatrix(parsedDataSet)
+    
+    reducedMatrix, evecs, evals = PCA(matrix, PCA_dim)
+    
+    rows,cols = reducedMatrix.shape
+    for r in range(rows):
+        parsedDataSet[r].featureVector = reducedMatrix[r]
+    
+    print option,k,metric
+    
+    dataSet = selectFromData(parsedDataSet, option)
+    dataMatrix = c.getDataMatrix(dataSet)
+    pairWiseDistances = squareform(pdist(dataMatrix, metric=distanceMeasure))
+   
+    kmeans = Kmeans(distanceMeasure, k, maxIter)
+    kmeans.doClustering(dataSet)
+    
+    metricVal = kmeans.evaluate(metric, dataSet, pairWiseDistances)
+    print metricVal
+    
+    title = 'PCA_kmeans_k'+str(k)+'_dataVersion_'+option
+    
+    visualizeClusters(kmeans.clusters, title, dataSet)
+    visualizeClustersClasses(kmeans.clusters, title+'_classes', dataSet)
 
 
 if __name__ == "__main__":
@@ -359,5 +393,6 @@ if __name__ == "__main__":
     #QB4()
     #QC()
     #bonus()
-    bonus4()
+    #bonus4()
+    bonus_B4()
     #main()
